@@ -31,7 +31,6 @@ import (
 	"github.com/openshift/installer/pkg/asset"
 	assetstore "github.com/openshift/installer/pkg/asset/store"
 	targetassets "github.com/openshift/installer/pkg/asset/targets"
-	destroybootstrap "github.com/openshift/installer/pkg/destroy/bootstrap"
 	cov1helpers "github.com/openshift/library-go/pkg/config/clusteroperator/v1helpers"
 )
 
@@ -106,11 +105,7 @@ var (
 				if keep, ok := os.LookupEnv("OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES"); ok && keep != "" {
 					logrus.Info("Keeping bootstrap resources because OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES is set.")
 				} else {
-					logrus.Info("Destroying the bootstrap resources...")
-					err = destroybootstrap.Destroy(rootOpts.dir)
-					if err != nil {
-						logrus.Fatal(err)
-					}
+					logrus.Info("Keeping bootstrap resources because OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES is set.")
 				}
 
 				err = waitForInstallComplete(ctx, config, rootOpts.dir)
