@@ -31,6 +31,7 @@ import (
 	"github.com/openshift/installer/pkg/asset"
 	assetstore "github.com/openshift/installer/pkg/asset/store"
 	targetassets "github.com/openshift/installer/pkg/asset/targets"
+	destroybootstrap "github.com/openshift/installer/pkg/destroy/bootstrap"
 	cov1helpers "github.com/openshift/library-go/pkg/config/clusteroperator/v1helpers"
 )
 
@@ -102,16 +103,21 @@ var (
 					logrus.Fatal("Bootstrap failed to complete: ", err)
 				}
 
-				if keep, ok := os.LookupEnv("OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES"); ok && keep != "" {
-					logrus.Info("Keeping bootstrap resources because OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES is set.")
-				} else {
-					logrus.Info("Keeping bootstrap resources because OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES is set.")
-				}
-
 				err = waitForInstallComplete(ctx, config, rootOpts.dir)
 				if err != nil {
 					logrus.Fatal(err)
 				}
+
+				if keep, ok := os.LookupEnv("OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES"); ok && keep != "" {
+					logrus.Info("Keeping bootstrap resources because OPENSHIFT_INSTALL_KEEP_BOOTSTRAP_RESOURCES is set.")
+				} else {
+					logrus.Info("Destroying bootstrap resources...")
+					err = destroybootstrap.Destroy(rootOpts.dir)
+					if err != nil {
+						logrus.Fatal(err)
+					}
+				}
+
 			},
 		},
 		assets: targetassets.Cluster,
@@ -317,7 +323,7 @@ func waitForBootstrapConfigMap(ctx context.Context, client *kubernetes.Clientset
 // waitForInitializedCluster watches the ClusterVersion waiting for confirmation
 // that the cluster has been initialized.
 func waitForInitializedCluster(ctx context.Context, config *rest.Config) error {
-	timeout := 30 * time.Minute
+	timeout := 40 * time.Minute
 	logrus.Infof("Waiting up to %v for the cluster at %s to initialize...", timeout, config.Host)
 	cc, err := configclient.NewForConfig(config)
 	if err != nil {
