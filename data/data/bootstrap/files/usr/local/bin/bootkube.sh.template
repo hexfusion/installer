@@ -366,7 +366,7 @@ bootkube_podman_run \
 	"${CLUSTER_BOOTSTRAP_IMAGE}" \
 	start --tear-down-early=false --asset-dir=/assets --required-pods="openshift-kube-apiserver/kube-apiserver,openshift-kube-scheduler/openshift-kube-scheduler,openshift-kube-controller-manager/kube-controller-manager,openshift-cluster-version/cluster-version-operator"
 
-if [ ! -z "$CLUSTER_ETCD_OPERATOR_IMAGE" ]
+if [ ! -z "$CLUSTER_ETCD_OPERATOR_MANAGED" ]
 then
 	echo "Waiting for CEO to finish..."
 	bootkube_podman_run \
